@@ -487,7 +487,7 @@ What is the value of `scalacOption in projD1`?
 * `List()`
 * something else?
 
-The answer is `List("-Ywarn-unused-import")`. The behaviour is as such:
+The answer is `List()`. The behaviour is as such:
 
 * The `scalacOptions` setting scoped in `projD1` will take precendence, but it depends on an existing value of
     `scalacOptions`..
