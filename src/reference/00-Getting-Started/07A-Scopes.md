@@ -472,7 +472,7 @@ lazy val root = (project in file("."))
       // scalacOptions in ThisBuild += "-Ywarn-unused-import"
       scalacOptions += "-Ywarn-unused-import"
     ))
-  ) aggregates (projD1, projD2) dependsOn (projD1, projD2)
+  ) aggregate (projD1, projD2) dependsOn (projD1, projD2)
 
 val projD1 = project settings (
   scalacOptions -= "-Ywarn-unused-import" // because of code generation
