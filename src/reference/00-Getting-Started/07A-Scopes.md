@@ -416,7 +416,7 @@ Let's look at an example. Given the following build definition:
 ```scala
 val bippy = settingKey[String]("The biddy identifier")
 
-bippy in Global := "abc"
+bippy in Global := "abc" // using Global scope to define the default, fallback value of bippy
 
 lazy val projB = (project in file("b"))
   .settings(
