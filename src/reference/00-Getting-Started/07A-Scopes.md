@@ -234,25 +234,7 @@ is the `fullClasspath` key scoped to the `test` configuration and the
 
 "Dependencies" was discussed in detail in the [previous page][Task-Graph].
 
-You can also see the delegates; if the value were not defined, sbt would
-search through:
-
-- two other configurations (`runtime:fullClasspath`,
-  `compile:fullClasspath`). In these scoped keys, the project is
-  unspecified meaning "current project" and the task is unspecified
-  meaning `Global`
-- configuration set to `Global` (`*:fullClasspath`), since project is
-  still unspecified it's "current project" and task is still
-  unspecified so `Global`
-- project set to `{.}` or `ThisBuild` (meaning the entire build, no
-  specific project)
-- project axis set to `Global` (`*/test:fullClasspath`) (remember, an
-  unspecified project means current, so searching `Global` here is new;
-  i.e. `*` and "no project shown" are different for the project axis;
-  i.e. `*/test:fullClasspath` is not the same as `test:fullClasspath`)
-- both project and configuration set to `Global` (`*/*:fullClasspath`)
-  (remember that unspecified task means `Global` already, so
-  `*/*:fullClasspath` uses `Global` for all three axes)
+We'll discuss "Delegates" later in this page.
 
 Try `inspect fullClasspath` (as opposed to the above example,
 inspect `test:fullClasspath`) to get a sense of the difference. Because
@@ -283,8 +265,8 @@ project is `{file:/home/hp/checkout/hello/}default-aea33a`, the
 configuration is `*` (meaning global), and the task is not shown (which
 also means global).
 
-Keys have an overloaded method called in used to set the scope. The
-argument to in can be an instance of any of the scope axes. So for
+Keys have an overloaded method called `.in` that is used to set the scope.
+The argument to `.in(...)` can be an instance of any of the scope axes. So for
 example, though there's no real reason to do this, you could set the
 `name` scoped to the `Compile` configuration:
 
@@ -393,3 +375,178 @@ lazy val util = (project in file("util"))
     // other settings
   )
 ```
+
+#### Delegation in detail (.value lookup)
+
+Now that we've covered all the details of scoping, we can explain the `.value`
+lookup in detail. It's ok to skip this section at in the beginning.
+To summarize what we've learned so far:
+
+- A particular scope consists of three scope axes: Subprojects, Dependency configuration, and Tasks.
+  You can think of axes like as digits in a number, or (r, g, b) components in a color.
+- There's a special value `Global` scope (written as `*` in shell) that can be applied to either of the axes.
+- There's a special value `ThisBuild` scope (written as `{.}` in shell) only for Subprojects axis.
+- build.sbt can reference a scoped key using `.in(...)` method.
+
+Now let's suppose we have a build definition as follows:
+
+```scala
+lazy val foo = settingKey[Int]("")
+lazy val bar = settingKey[Int]("")
+
+lazy val projA = (project in file("a"))
+  .settings(
+    foo := {
+      (bar in Test).value + 1
+    },
+    bar in Compile := 1
+  )
+```
+
+Inside of `foo`'s setting body the dependency a scoped key `(bar in Test)` is declared.
+However, as you see, `bar in Test` is undefined in `projA`.
+sbt is able to still resolve `(bar in Test)` to another scoped key,
+and initialize `foo` as `2`.
+This fallback search path is called *scope delegation*.
+
+First rule is that the _precedence_ among the axes is:
+Subprojects, Dependency configuration, and then Tasks.
+
+- Rule 1A: If a scope has more specific Subproject axis, then it will always have higher precedence over other scopes without.
+- Rule 1B: If a scope has more specific Dependency configuration, then it will have higher precedence over specific task scoping.
+
+What is the expected `name in projB` value in the following build?
+
+```scala
+scalaVersion in (ThisBuild, packageBin) := "2.12.2"
+
+lazy val projB = (project in file("b"))
+  .settings(
+    name := {
+      "foo" + (scalaVersion in packageBin).value
+    },
+    scalaVersion := "2.11.11"
+  )
+```
+
+The answer is `foo2.11.11`. Because of Rule 1A `scalaVersion` scoped to `projB` has
+higher precendence over `(ThisBuild, packageBin)`.
+
+Next, what would you see if you ran `projC/test`?
+
+```scala
+scalacOptions in ThisBuild += "-Ywarn-unused-import"
+
+lazy val projC = (project in file("c"))
+  .settings(
+    test := {
+      println((scalacOptions in (Compile, console)).value)
+    },
+    scalacOptions in console -= "-Ywarn-unused-import",
+    scalacOptions in Compile := scalacOptions.value // added by sbt
+  )
+```
+
+The answer is `List(-Ywarn-unused-import)`. Because of Rule 1B `scalacOptions in Compile`
+has higher precedence than `scalacOptions in console`.
+
+- Rule 2: For Dependency configuration axis, sbt searches in the order of the given value,
+  its parents, their parents recursively, and then falls back to `Global`.
+
+The example for that is `projA` that we saw earlier:
+
+```scala
+lazy val foo = settingKey[Int]("")
+lazy val bar = settingKey[Int]("")
+
+lazy val projA = (project in file("a"))
+  .settings(
+    foo := {
+      (bar in Test).value + 1
+    },
+    bar in Compile := 1
+  )
+```
+
+`(bar in Test)` is undefined, but due to Rule 2 it will look for `(bar in Runtime)` first,
+which is `Test` configuration's parent, then `(bar in Compile)`, which is its parent.
+
+- Rule 3: For Task axis, sbt searches for the given value, and then falls back to `Global`,
+  which is non-task scoped version of the scope.
+
+We can apply Rule 3 to think about the `(scalacOptions in (Compile, console))` example.
+Since `(scalacOptions in (Compile, console))` was not there, Rule 3 says that one of
+the delegates is `(scalacOptions in Compile)`.
+
+These are well defined rules, but you might want to look up quickly what is going on.
+This is where `inspect` can be used.
+
+```
+Hello> inspect projC/compile:console::scalacOptions
+[info] Task: scala.collection.Seq[java.lang.String]
+[info] Description:
+[info]  Options for the Scala compiler.
+[info] Provided by:
+[info]  {file:/Users/xxxx/}projC/compile:scalacOptions
+[info] Defined at:
+[info]  /Users/xxxx/build.sbt:47
+[info] Reverse dependencies:
+[info]  projC/compile:console
+[info]  projC/*:test
+[info] Delegates:
+[info]  projC/compile:console::scalacOptions
+[info]  projC/compile:scalacOptions
+[info]  projC/*:console::scalacOptions
+[info]  projC/*:scalacOptions
+[info]  {.}/compile:console::scalacOptions
+[info]  {.}/compile:scalacOptions
+[info]  {.}/*:console::scalacOptions
+[info]  {.}/*:scalacOptions
+[info]  */compile:console::scalacOptions
+[info]  */compile:scalacOptions
+[info]  */*:console::scalacOptions
+[info]  */*:scalacOptions
+....
+```
+
+See "Provided by". This shows that `projC/compile:console::scalacOptions` is
+actually delegated to `projC/compile:scalacOptions`.
+Next see the "Delegates". This is *all* of the possible delegate candidates
+listed in the order of precedence.
+
+- All the scopes with `projC` scoping on Subproject axis are listed first,
+  then `ThisBuild` (`{.}`), and `Global` (`*`).
+- Within a subproject, scopes with `Compile` scoping on Dependency configuration axis
+  are listed first, then falls back to `Global` (`*`) configuration.
+- Finally, Task axis scoping lists the given task value `console::` and the one without.
+
+Note that scope delegation feels similar to class inheritance in an object-oriented language,
+but there's a difference. In an OO language like Scala if there's a method named
+`drawShape` on a trait `Shape`, its subclasses can override that even when `drawShape` is used
+within the `Shape` trait, which is called dynamic dispatch.
+
+In `build.sbt`, however, if you define a setting in terms of another setting at the build level,
+a key scoped to project level might delegate to the build level, but it will *not* come back.
+Here is an example.
+
+```scala
+lazy val root = (project in file("."))
+  .settings(
+    inThisBuild(List(
+      organization := "com.example",
+      scalaVersion := "2.12.2",
+      version      := scalaVersion.value + "_0.1.0"
+    )),
+    name := "Hello"
+  )
+
+lazy val projD = (project in file("d"))
+  .settings(
+    scalaVersion := "2.11.11"
+  )
+```
+
+What will `projD/version` return? The answer is `2.12.2_0.1.0`.
+`projD/version` delegates to `version in ThisBuild`,
+and it depends on `scalaVersion in ThisBuild`.
+Because of this reason, build level setting should be limited mostly to simple value assignments.
