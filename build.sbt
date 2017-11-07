@@ -4,12 +4,31 @@ import Docs._
 lazy val tutorialSubDirName = settingKey[String]("subdir name for old tutorial")
 lazy val fileEncoding = settingKey[String]("check the file encoding")
 
+lazy val windowsBuildVersion = settingKey[String]("Windows build version tends to be different from the rest")
+lazy val sbtVersionForScalaDoc = settingKey[String]("")
+
 lazy val root = (project in file("."))
-  .enablePlugins(NanocPlugin, LowTechSnippetPamfletPlugin)
+  .enablePlugins(LowTechSnippetPamfletPlugin, ParadoxSitePlugin)
   .settings(
     organization := "org.scala-sbt",
     name := "website",
     siteEmail := "eed3si9n" + "@gmail.com",
+    // Landing pages
+    sourceDirectory in Paradox := sourceDirectory.value / "landing",
+    sourceDirectory in (Paradox, paradoxTheme) := sourceDirectory.value / "landing" / "_template",
+
+    windowsBuildVersion := targetSbtFullVersion,
+    sbtVersionForScalaDoc := targetSbtFullVersion,
+
+    paradoxProperties in Paradox ++= Map(
+      "github.base_url"       -> s"https://github.com/sbt/sbt/tree/1.x",
+      "scaladoc.sbt.base_url" -> s"https://www.scala-sbt.org/${targetSbtFullVersion}/api/",
+      "sbtVersion"            -> targetSbtFullVersion,
+      "windowsBuild"          -> windowsBuildVersion.value,
+      "sbtVersionForScalaDoc" -> sbtVersionForScalaDoc.value,
+      "sbtBinaryVersion"      -> targetSbtBinaryVersion
+    ),
+
     // Reference
     sourceDirectory in Pamflet := baseDirectory.value / "src" / "reference",
     siteSubdirName in Pamflet := s"""$targetSbtBinaryVersion/docs""",
@@ -21,13 +40,15 @@ lazy val root = (project in file("."))
     SiteHelpers.addMappingsToSiteDir(mappings in RedirectTutorial, tutorialSubDirName),
     // GitHub Pages. See project/Docs.scala
     customGhPagesSettings,
+
     // NOTE - PDF settings must be done externally like this because pdf generation generically looks
     // through `mappings in Config` for Combined+Pages.md to generate PDF from, and therefore we
     // can't create a circular dpeendnecy by adding it back into the original mappings.
-    Pdf.settings,
-    Pdf.settingsFor(Pamflet, "sbt-reference"),
-    SiteHelpers.addMappingsToSiteDir(mappings in Pdf.generatePdf in Pamflet,
-                                     siteSubdirName in Pamflet),
+    // Pdf.settings,
+    // Pdf.settingsFor(Pamflet, "sbt-reference"),
+    // SiteHelpers.addMappingsToSiteDir(mappings in Pdf.generatePdf in Pamflet,
+    //                                  siteSubdirName in Pamflet),
+
     fileEncoding := {
       sys.props("file.encoding") match {
         case "UTF-8" => "UTF-8"

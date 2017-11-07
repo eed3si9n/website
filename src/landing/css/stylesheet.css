@@ -34,7 +34,7 @@ body.landing header {
 
 @media (min-width: 992px) {
   body.landing header {
-    background: transparent url('polygon-alter.jpg') repeat-x center top;
+    background: transparent url('../content/polygon-alter.jpg') repeat-x center top;
     height: 300px;
   }
 
@@ -56,7 +56,7 @@ span.statement {
 .wrench {
   width: 100%;
   height: 100%;
-  background: transparent url('wrench-1000-center-navy.png') no-repeat center 135px;
+  background: transparent url('../content/wrench-1000-center-navy.png') no-repeat center 135px;
 }
 
 header nav {
@@ -171,6 +171,10 @@ header .nav img.social {
 }
 .default .content {
   min-height: 500px;
+}
+
+.default .content h1 {
+  display: none;
 }
 
 h1 {

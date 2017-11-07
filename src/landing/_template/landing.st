@@ -4,16 +4,15 @@
     <meta charset="utf-8">
     <title>sbt - The interactive build tool</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="<%= @items['/bootstrap_style/'].path %>">
-    <link rel="stylesheet" href="<%= @items['/bootstrap-theme/'].path %>">
-    <link rel="stylesheet" href="<%= @items['/stylesheet/'].path %>?v2017-09-22c">
+    <link rel="stylesheet" href="$page.base$css/bootstrap_style.min.css">
+    <link rel="stylesheet" href="$page.base$css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="$page.base$css/stylesheet.css?v2017-09-22c">
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic,700italic" rel="stylesheet" type="text/css">
-    <link rel='shortcut icon' href="<%= @items['/favicon/'].path %>" />
-    <link rel="icon" type="image/png" sizes="32x32" href="<%= @items['/favicon-32x32/'].path %>">
-    <link rel="icon" type="image/png" sizes="96x96" href="<%= @items['/favicon-96x96/'].path %>">
-    <link rel="icon" type="image/png" sizes="16x16" href="<%= @items['/favicon-16x16/'].path %>">
-    <!-- you don't need to keep this, but it's cool for stats! -->
-    <meta name="generator" content="nanoc <%= Nanoc::VERSION %>">
+    <link rel='shortcut icon' href="$page.base$content/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="$page.base$content/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="$page.base$content/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="$page.base$content/favicon-16x16.png">
+
     <meta name="google-site-verification" content="I28z-8Rg5JifsOR9NpTD9C9dFYutH_Dz8QWOHUDs6lg">
   </head>
   <body class="landing">
@@ -23,19 +22,19 @@
           <div class="row">
             <div class="col-md-3">
               <div class="logo">
-                <a href="<%= @items['/'].path %>index.html">
-                  <img src="<%= @items['/sbt-logo/'].path %>" alt="sbt">
+                <a href="/">
+                  <img src="$page.base$content/sbt-logo.svg" alt="sbt">
                 </a>
               </div>
             </div>
             <div class="col-md-9">
               <div class="nav">
-                <a href="<%= @items['/documentation/'].path %>">Documentation</a>
-                <a href="<%= @items['/download/'].path %>">Download</a>
-                <a href="<%= @items['/support/'].path %>">Support</a>
-                <a href="<%= @items['/community/'].path %>">Get Involved</a>
-                <a id="source-code" href="https://github.com/sbt/sbt"><img src="<%= @items['/github-logo-teal/'].path %>" alt="Source code" class="social"></a>
-                <a id="twitter" href="https://twitter.com/scala_sbt"><img src="<%= @items['/twitter-logo-teal/'].path %>" alt="sbt on Twitter" class="social"></a>
+                <a href="documentation.html">Documentation</a>
+                <a href="download.html">Download</a>
+                <a href="support.html">Support</a>
+                <a href="community.html">Get Involved</a>
+                <a id="source-code" href="https://github.com/sbt/sbt"><img src="$page.base$content/github-logo-teal.svg" alt="Source code" class="social"></a>
+                <a id="twitter" href="https://twitter.com/scala_sbt"><img src="$page.base$content/twitter-logo-teal.svg" alt="sbt on Twitter" class="social"></a>
               </div>
             </div>
           </div>
@@ -62,7 +61,7 @@
         <div class="row">
           <div class="col-md-12">
             <div id="main" class="text-center">
-              <%= yield %>
+              $page.content$
             </div>
           </div>
         </div>
@@ -104,27 +103,27 @@
         <div class="row">
           <div class="col-md-8 sbt">
             <nav>
-              <a href="<%= @items['/'].path %>index.html">
-                <img src="<%= @items['/sbt-logo-reverse/'].path %>" alt="sbt">
+              <a href="/">
+                <img src="$page.base$content/sbt-logo-reverse.svg" alt="sbt">
               </a>
-              <a href="<%= @items['/documentation/'].path %>">Documentation</a>
-              <a href="<%= @items['/download/'].path %>">Download</a>
-              <a href="<%= @items['/community/'].path %>">Get Involved</a>
+              <a href="documentation.html">Documentation</a>
+              <a href="download.html">Download</a>
+              <a href="support.html">Support</a>
+              <a href="community.html">Get Involved</a>
             </nav>
           </div>
           <div class="col-md-4 text-right ts">
             &copy; 2016-2017 Lightbend Inc.
             <a href="https://www.lightbend.com">
-              <img src="<%= @items['/lightbend_reverse/'].path %>" alt="Lightbend, Inc.">
+              <img src="$page.base$content/lightbend_reverse.svg" alt="Lightbend, Inc.">
             </a>
-
           </div>
         </div>
       </div>
     </footer>
     <!-- Placed at the end -->
-    <script src="<%= @items['/jquery/'].path %>" type="text/javascript"></script>
-    <script src="<%= @items['/bootstrap/'].path %>" type="text/javascript"></script>
+    <script src="$page.base$assets/jquery.min.js" type="text/javascript"></script>
+    <script src="$page.base$assets/bootstrap.min.js" type="text/javascript"></script>
     <script type="text/javascript" async>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

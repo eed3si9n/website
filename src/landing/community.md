@@ -16,6 +16,9 @@ title: Get Involved
   [327]: https://github.com/sbt/sbt/issues/327
   [831]: https://github.com/sbt/sbt/issues/831
 
+Get Involved
+============
+
 <h2 id="how-can-I-get-help">How can I get help? <a href="#how-can-I-get-help" class="header-link"><span class="header-link-content">&nbsp;</span></a></h2>
 
 For how to get help see [Support](http://www.scala-sbt.org/support.html#how-can-I-get-help).

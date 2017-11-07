@@ -2,11 +2,16 @@
 title: Documentation
 ---
 
+Documentation
+=============
+
 sbt 1.x
 -------
 
 - [sbt documentation](1.x/docs/index.html) ([pdf](1.x/docs/sbt-reference.pdf))
-- [sbt API](<%= @config[:sbtVersionForScalaDoc] %>/api/sbt/Keys$.html) 
+- [sbt API]($sbtVersionForScalaDoc$/api/sbt/Keys\$.html)
+
+<!-- $sbtVersionForScalaDoc$ doesn't render correctly in the link. -->
 
 <!--
 ([source](<%= @config[:sbtVersionForScalaDoc] %>/sxr/index.html))

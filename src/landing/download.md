@@ -2,6 +2,9 @@
 title: Download
 ---
 
+Download
+========
+
 <div class="arc_mac">
 <h2>Mac</h2>
 
